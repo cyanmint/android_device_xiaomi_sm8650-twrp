@@ -84,13 +84,24 @@ jobs:
         mkdir -p ${GITHUB_WORKSPACE}/OrangeFox
         cd ${GITHUB_WORKSPACE}/OrangeFox
         
-        # Check if cached source exists
-        if [ -d "fox_${{ inputs.MANIFEST_BRANCH }}/.repo" ]; then
-          echo "Cache found, syncing only changes..."
+        # Check if cached source exists and is valid
+        if [ -d "fox_${{ inputs.MANIFEST_BRANCH }}/.repo" ] && [ -d "fox_${{ inputs.MANIFEST_BRANCH }}/.repo/manifests" ]; then
+          echo "Cache found, validating and syncing changes..."
           cd fox_${{ inputs.MANIFEST_BRANCH }}
-          repo sync -c -j$(nproc --all) --no-clone-bundle --no-tags
+          if repo sync -c -j$(nproc --all) --no-clone-bundle --no-tags; then
+            echo "Incremental sync completed successfully"
+          else
+            echo "Incremental sync failed, falling back to full sync..."
+            cd ${GITHUB_WORKSPACE}/OrangeFox
+            rm -rf fox_${{ inputs.MANIFEST_BRANCH }}
+            git config --global user.name "${{ github.actor }}"
+            git config --global user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+            git clone https://gitlab.com/OrangeFox/sync.git -b master
+            cd sync
+            ./orangefox_sync.sh --branch ${{ inputs.MANIFEST_BRANCH }} --path ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
+          fi
         else
-          echo "No cache found, performing full sync..."
+          echo "No valid cache found, performing full sync..."
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
           git clone https://gitlab.com/OrangeFox/sync.git -b master
