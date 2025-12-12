@@ -69,17 +69,36 @@ jobs:
         git clone https://gitlab.com/OrangeFox/misc/scripts.git -b master
         cd scripts
         sudo bash setup/android_build_env.sh
+
+    - name: Cache OrangeFox Source
+      uses: actions/cache@v4
+      with:
+        path: |
+          OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}/.repo
+          OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}/
+        key: orangefox-${{ inputs.MANIFEST_BRANCH }}-${{ github.run_id }}
+        restore-keys: |
+          orangefox-${{ inputs.MANIFEST_BRANCH }}-
       
     - name: Set-up Manifest
       if: inputs.MANIFEST_BRANCH == '11.0' || inputs.MANIFEST_BRANCH == '12.1'
       run: |
         mkdir -p ${GITHUB_WORKSPACE}/OrangeFox
         cd ${GITHUB_WORKSPACE}/OrangeFox
-        git config --global user.name "${{ github.actor }}"
-        git config --global user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
-        git clone https://gitlab.com/OrangeFox/sync.git -b master
-        cd sync
-        ./orangefox_sync.sh --branch ${{ inputs.MANIFEST_BRANCH }} --path ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
+        
+        # Check if cached source exists
+        if [ -d "fox_${{ inputs.MANIFEST_BRANCH }}/.repo" ]; then
+          echo "Cache found, syncing only changes..."
+          cd fox_${{ inputs.MANIFEST_BRANCH }}
+          repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
+        else
+          echo "No cache found, performing full sync..."
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          git clone https://gitlab.com/OrangeFox/sync.git -b master
+          cd sync
+          ./orangefox_sync.sh --branch ${{ inputs.MANIFEST_BRANCH }} --path ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
+        fi
 
     - name: Clone Device Tree
       run: |
