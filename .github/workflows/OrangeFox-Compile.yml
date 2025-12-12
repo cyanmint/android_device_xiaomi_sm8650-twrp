@@ -15,12 +15,12 @@ on:
         default: '12.1'
         type: choice
         options:
-        - 12.1
-        - 11.0
+        - '12.1'
+        - '11.0'
       DEVICE_TREE:
         description: 'OrangeFox Device Tree'
         required: true
-        default: 'https://github.com/watchings/android_device_xiaomi_sm8650-twrp'
+        default: 'https://github.com/cyanmint/android_device_xiaomi_sm8650-twrp'
       DEVICE_TREE_BRANCH:
         description: 'OrangeFox Device Tree Branch'
         required: true
