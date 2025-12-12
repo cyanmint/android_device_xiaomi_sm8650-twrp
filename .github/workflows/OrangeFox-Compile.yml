@@ -112,6 +112,8 @@ jobs:
     - name: Clone Device Tree
       run: |
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
+        # Remove existing device tree to ensure fresh clone
+        rm -rf ./${{ inputs.DEVICE_PATH }}
         git clone ${{ inputs.DEVICE_TREE }} -b ${{ inputs.DEVICE_TREE_BRANCH }} ./${{ inputs.DEVICE_PATH }}
         cd ${{ inputs.DEVICE_PATH }}
         echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_ENV
