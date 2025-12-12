@@ -19,8 +19,8 @@ DEVICE_PATH := device/xiaomi/sm8650
 # Inherit from device.mk configuration
 $(call inherit-product, $(DEVICE_PATH)/device.mk)
 
-# dependencies
-PRODUCT_COPY_FILES += $(call find-copy-subdir-files,*,device/xiaomi/sm8650/prebuilts/peridot,recovery/root/vendor)
+# dependencies (exclude .ko files as they are ELF binaries)
+PRODUCT_COPY_FILES += $(filter-out %.ko,$(call find-copy-subdir-files,*,device/xiaomi/sm8650/prebuilts/peridot,recovery/root/vendor))
 
 # Release name
 PRODUCT_RELEASE_NAME := peridot
