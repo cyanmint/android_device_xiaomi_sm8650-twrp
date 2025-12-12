@@ -82,7 +82,7 @@ jobs:
       with:
         path: |
           OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
-        key: orangefox-manifest-${{ inputs.MANIFEST_BRANCH }}-${{ hashFiles('**/orangefox_sync.sh') }}
+        key: orangefox-manifest-${{ inputs.MANIFEST_BRANCH }}-v1
         restore-keys: |
           orangefox-manifest-${{ inputs.MANIFEST_BRANCH }}-
       
@@ -99,6 +99,7 @@ jobs:
 
     - name: Clone Device Tree
       run: |
+        mkdir -p ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
         git clone ${{ inputs.DEVICE_TREE }} -b ${{ inputs.DEVICE_TREE_BRANCH }} ./${{ inputs.DEVICE_PATH }}
         cd ${{ inputs.DEVICE_PATH }}
@@ -109,7 +110,7 @@ jobs:
       with:
         path: |
           ~/.ccache
-        key: orangefox-build-${{ inputs.MANIFEST_BRANCH }}-${{ inputs.DEVICE_NAME }}-${{ github.sha }}
+        key: orangefox-build-${{ inputs.MANIFEST_BRANCH }}-${{ inputs.DEVICE_NAME }}-v1
         restore-keys: |
           orangefox-build-${{ inputs.MANIFEST_BRANCH }}-${{ inputs.DEVICE_NAME }}-
           orangefox-build-${{ inputs.MANIFEST_BRANCH }}-
