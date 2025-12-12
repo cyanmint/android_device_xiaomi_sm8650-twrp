@@ -116,17 +116,6 @@ jobs:
         cd ${{ inputs.DEVICE_PATH }}
         echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
-    - name: Cache Build Artifacts
-      uses: actions/cache@v4
-      with:
-        path: |
-          OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}/out/host
-          OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}/out/target/common
-          OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}/out/target/product/${{ inputs.DEVICE_NAME }}/obj
-        key: build-artifacts-${{ inputs.MANIFEST_BRANCH }}-${{ inputs.DEVICE_NAME }}-${{ github.sha }}
-        restore-keys: |
-          build-artifacts-${{ inputs.MANIFEST_BRANCH }}-${{ inputs.DEVICE_NAME }}-
-
     - name: Building OrangeFox
       run: |
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
