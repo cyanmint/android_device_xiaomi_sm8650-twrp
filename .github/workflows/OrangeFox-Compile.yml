@@ -69,9 +69,25 @@ jobs:
         git clone https://gitlab.com/OrangeFox/misc/scripts.git -b master
         cd scripts
         sudo bash setup/android_build_env.sh
+
+    - name: Setup ccache
+      run: |
+        sudo apt-get install -y ccache
+        ccache -M 10G
+        ccache -z
+
+    - name: Cache OrangeFox Manifest
+      id: cache-manifest
+      uses: actions/cache@v4
+      with:
+        path: |
+          OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
+        key: orangefox-manifest-${{ inputs.MANIFEST_BRANCH }}-${{ github.run_id }}
+        restore-keys: |
+          orangefox-manifest-${{ inputs.MANIFEST_BRANCH }}-
       
     - name: Set-up Manifest
-      if: inputs.MANIFEST_BRANCH == '11.0' || inputs.MANIFEST_BRANCH == '12.1'
+      if: (inputs.MANIFEST_BRANCH == '11.0' || inputs.MANIFEST_BRANCH == '12.1') && steps.cache-manifest.outputs.cache-hit != 'true'
       run: |
         mkdir -p ${GITHUB_WORKSPACE}/OrangeFox
         cd ${GITHUB_WORKSPACE}/OrangeFox
@@ -88,12 +104,27 @@ jobs:
         cd ${{ inputs.DEVICE_PATH }}
         echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
+    - name: Cache Build Artifacts
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.ccache
+          OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}/out/soong/.intermediates
+          OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}/out/host
+        key: orangefox-build-${{ inputs.MANIFEST_BRANCH }}-${{ inputs.DEVICE_NAME }}-${{ github.sha }}
+        restore-keys: |
+          orangefox-build-${{ inputs.MANIFEST_BRANCH }}-${{ inputs.DEVICE_NAME }}-
+          orangefox-build-${{ inputs.MANIFEST_BRANCH }}-
+
     - name: Building OrangeFox
       run: |
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
         set +e
         source build/envsetup.sh
         export ALLOW_MISSING_DEPENDENCIES=true
+        export USE_CCACHE=1
+        export CCACHE_DIR=~/.ccache
+        export CCACHE_EXEC=/usr/bin/ccache
         set -e
         lunch twrp_${{ inputs.DEVICE_NAME }}-eng && make clean && mka adbd ${{ inputs.BUILD_TARGET }}image
 
