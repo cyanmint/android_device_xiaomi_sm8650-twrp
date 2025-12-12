@@ -19,8 +19,8 @@ DEVICE_PATH := device/xiaomi/sm8650
 # Inherit from device.mk configuration
 $(call inherit-product, $(DEVICE_PATH)/device.mk)
 
-# dependencies (exclude .ko files as they are ELF binaries)
-PRODUCT_COPY_FILES += $(filter-out %.ko,$(call find-copy-subdir-files,*,device/xiaomi/sm8650/prebuilts/shennong,recovery/root/vendor))
+# dependencies (copy only firmware files, skip kernel modules)
+PRODUCT_COPY_FILES += $(call find-copy-subdir-files,*,device/xiaomi/sm8650/prebuilts/shennong/firmware,recovery/root/vendor/firmware)
 
 # Release name
 PRODUCT_RELEASE_NAME := shennong
