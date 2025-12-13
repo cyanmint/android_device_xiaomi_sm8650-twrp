@@ -30,5 +30,13 @@ Quick start:
 # 2. Add modules to device tree
 ./add_modules_to_recovery.sh <device_codename> extracted_modules
 
-# 3. Rebuild recovery
+# 3. Verify setup
+./verify_setup.sh <device_codename>
+
+# 4. Rebuild recovery
+```
+
+Or use the all-in-one script:
+```bash
+./setup_touchscreen.sh boot.img <device_codename>
 ```

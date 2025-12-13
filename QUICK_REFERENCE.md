@@ -4,8 +4,7 @@
 
 ```bash
 # Extract and add in one go (for aurora device example)
-./extract_touch_modules.sh boot.img modules_temp && \
-./add_modules_to_recovery.sh aurora modules_temp
+./setup_touchscreen.sh boot.img aurora
 ```
 
 ## Individual Steps
@@ -28,6 +27,15 @@
 ./add_modules_to_recovery.sh aurora extracted_modules
 ./add_modules_to_recovery.sh peridot modules
 ./add_modules_to_recovery.sh ruyi /path/to/modules
+```
+
+### 3. Verify Setup
+```bash
+./verify_setup.sh <device_codename>
+
+# Examples:
+./verify_setup.sh aurora
+./verify_setup.sh peridot
 ```
 
 ## Device Codenames
