@@ -74,6 +74,19 @@ if [ ! -f "$DEVICE_MAKEFILE" ]; then
     exit 1
 fi
 
+# Extract DEVICE_PATH from makefile (more flexible than hardcoding)
+DEVICE_PATH=$(grep -m1 "^DEVICE_PATH :=" "$DEVICE_MAKEFILE" 2>/dev/null | sed 's/DEVICE_PATH := //' | tr -d ' ')
+if [ -z "$DEVICE_PATH" ]; then
+    # Fallback: try to detect from directory structure
+    DEVICE_PATH=$(pwd | sed 's|.*/\(device/[^/]*/[^/]*\).*|\1|')
+    if [[ ! "$DEVICE_PATH" =~ ^device/ ]]; then
+        # If still not detected, use a generic path
+        print_warn "Could not auto-detect DEVICE_PATH, using generic path"
+        DEVICE_PATH="device/vendor/codename"
+    fi
+fi
+print_info "Detected DEVICE_PATH: $DEVICE_PATH"
+
 # Check if PRODUCT_COPY_FILES for modules already exists
 if grep -q "prebuilts/$DEVICE_CODENAME/modules" "$DEVICE_MAKEFILE"; then
     print_warn "Module copy directive already exists in $DEVICE_MAKEFILE"
@@ -84,14 +97,14 @@ else
     # Find the line with firmware copy, add modules copy after it
     if grep -q "prebuilts/$DEVICE_CODENAME/firmware" "$DEVICE_MAKEFILE"; then
         # Add after firmware line
-        sed -i "/prebuilts\/$DEVICE_CODENAME\/firmware/a # dependencies (copy kernel modules for touchscreen)\nPRODUCT_COPY_FILES += \$(call find-copy-subdir-files,*,device/xiaomi/sm8650/prebuilts/$DEVICE_CODENAME/modules,recovery/root/vendor/lib/modules)" "$DEVICE_MAKEFILE"
+        sed -i "/prebuilts\/$DEVICE_CODENAME\/firmware/a # dependencies (copy kernel modules for touchscreen)\nPRODUCT_COPY_FILES += \$(call find-copy-subdir-files,*,$DEVICE_PATH/prebuilts/$DEVICE_CODENAME/modules,recovery/root/vendor/lib/modules)" "$DEVICE_MAKEFILE"
         print_info "Added module copy directive after firmware line"
     else
         # Add after dependencies comment or device.mk inherit
         if grep -q "# dependencies" "$DEVICE_MAKEFILE"; then
-            sed -i "/# dependencies/a # dependencies (copy kernel modules for touchscreen)\nPRODUCT_COPY_FILES += \$(call find-copy-subdir-files,*,device/xiaomi/sm8650/prebuilts/$DEVICE_CODENAME/modules,recovery/root/vendor/lib/modules)" "$DEVICE_MAKEFILE"
+            sed -i "/# dependencies/a # dependencies (copy kernel modules for touchscreen)\nPRODUCT_COPY_FILES += \$(call find-copy-subdir-files,*,$DEVICE_PATH/prebuilts/$DEVICE_CODENAME/modules,recovery/root/vendor/lib/modules)" "$DEVICE_MAKEFILE"
         else
-            sed -i "/inherit-product.*device.mk/a \n# dependencies (copy kernel modules for touchscreen)\nPRODUCT_COPY_FILES += \$(call find-copy-subdir-files,*,device/xiaomi/sm8650/prebuilts/$DEVICE_CODENAME/modules,recovery/root/vendor/lib/modules)" "$DEVICE_MAKEFILE"
+            sed -i "/inherit-product.*device.mk/a \n# dependencies (copy kernel modules for touchscreen)\nPRODUCT_COPY_FILES += \$(call find-copy-subdir-files,*,$DEVICE_PATH/prebuilts/$DEVICE_CODENAME/modules,recovery/root/vendor/lib/modules)" "$DEVICE_MAKEFILE"
         fi
         print_info "Added module copy directive to $DEVICE_MAKEFILE"
     fi

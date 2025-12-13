@@ -122,7 +122,7 @@ grep -A2 "modules" twrp_<device_codename>.mk
 You should see something like:
 ```makefile
 # dependencies (copy kernel modules for touchscreen)
-PRODUCT_COPY_FILES += $(call find-copy-subdir-files,*,device/xiaomi/sm8650/prebuilts/<device>/modules,recovery/root/vendor/lib/modules)
+PRODUCT_COPY_FILES += $(call find-copy-subdir-files,*,$(DEVICE_PATH)/prebuilts/<device>/modules,recovery/root/vendor/lib/modules)
 ```
 
 ### Step 4: Rebuild Recovery

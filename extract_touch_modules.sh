@@ -254,7 +254,7 @@ print_info "     cp $OUTPUT_DIR/*.ko prebuilts/<device_codename>/modules/"
 print_info ""
 print_info "  2. Update your device makefile (twrp_<device>.mk):"
 print_info "     Add: PRODUCT_COPY_FILES += \$(call find-copy-subdir-files,*,\\"
-print_info "          device/xiaomi/sm8650/prebuilts/<device>/modules,recovery/root/vendor/lib/modules)"
+print_info "          \$(DEVICE_PATH)/prebuilts/<device>/modules,recovery/root/vendor/lib/modules)"
 print_info ""
 print_info "  3. Rebuild your recovery image"
 
