@@ -91,17 +91,39 @@ jobs:
       run: |
         mkdir -p ${GITHUB_WORKSPACE}/OrangeFox
         cd ${GITHUB_WORKSPACE}/OrangeFox
-        git config --global user.name "${{ github.actor }}"
-        git config --global user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
-        git clone https://gitlab.com/OrangeFox/sync.git -b master
-        cd sync
-        ./orangefox_sync.sh --branch ${{ inputs.MANIFEST_BRANCH }} --path ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
+        
+        # Check if cached source exists and is valid
+        if [ -d "fox_${{ inputs.MANIFEST_BRANCH }}/.repo" ] && [ -d "fox_${{ inputs.MANIFEST_BRANCH }}/.repo/manifests" ]; then
+          echo "Cache found, validating and syncing changes..."
+          cd fox_${{ inputs.MANIFEST_BRANCH }}
+          if repo sync -c -j$(nproc --all) --no-clone-bundle --no-tags; then
+            echo "Incremental sync completed successfully"
+          else
+            echo "Incremental sync failed, falling back to full sync..."
+            cd ${GITHUB_WORKSPACE}/OrangeFox
+            rm -rf fox_${{ inputs.MANIFEST_BRANCH }}
+            git config --global user.name "${{ github.actor }}"
+            git config --global user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+            git clone https://gitlab.com/OrangeFox/sync.git -b master
+            cd sync
+            ./orangefox_sync.sh --branch ${{ inputs.MANIFEST_BRANCH }} --path ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
+          fi
+        else
+          echo "No valid cache found, performing full sync..."
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          git clone https://gitlab.com/OrangeFox/sync.git -b master
+          cd sync
+          ./orangefox_sync.sh --branch ${{ inputs.MANIFEST_BRANCH }} --path ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
+        fi
 
     - name: Clone Device Tree
       run: |
         # Ensure directory exists (needed when cache restores manifest but skips setup step)
         mkdir -p ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
+        # Remove existing device tree to ensure fresh clone
+        rm -rf ./${{ inputs.DEVICE_PATH }}
         git clone ${{ inputs.DEVICE_TREE }} -b ${{ inputs.DEVICE_TREE_BRANCH }} ./${{ inputs.DEVICE_PATH }}
         cd ${{ inputs.DEVICE_PATH }}
         echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_ENV
@@ -129,6 +151,16 @@ jobs:
         # Note: 'make clean' intentionally omitted to leverage ccache and enable incremental builds
         lunch twrp_${{ inputs.DEVICE_NAME }}-eng && mka adbd ${{ inputs.BUILD_TARGET }}image
 
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: OrangeFox-${{ inputs.DEVICE_NAME }}-${{ github.run_id }}
+        path: |
+          OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}/out/target/product/${{ inputs.DEVICE_NAME }}/OrangeFox*.img
+          OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}/out/target/product/${{ inputs.DEVICE_NAME }}/OrangeFox*.zip
+        retention-days: 30
+        if-no-files-found: warn
+
     - name: Set Release Properties
       run: |
         echo "BUILD_DATE=$(TZ=Asia/Manila date +%Y%m%d)" >> $GITHUB_ENV
@@ -154,3 +186,4 @@ jobs:
           Device: [Device Tree/Branch](${{ env.DEVICE_TREE_URL }}/tree/${{ inputs.DEVICE_TREE_BRANCH }})
           Commit: Most recent [commit](${{ env.DEVICE_TREE_URL }}/commit/${{ env.COMMIT_ID }}) during building.
           
+
