@@ -18,25 +18,30 @@ Compile your first custom recovery from OrangeFox Recovery using Github Action.
 
 # Touchscreen Issues?
 
-If your OrangeFox recovery builds but the touchscreen doesn't respond, you need to extract touchscreen drivers from your boot image and add them to the recovery.
+If your OrangeFox recovery builds but the touchscreen doesn't respond, you need to extract touchscreen drivers and add them to the recovery.
 
 📖 **See [TOUCHSCREEN_GUIDE.md](TOUCHSCREEN_GUIDE.md) for detailed instructions**
 
 Quick start:
+
+**Option 1: Extract from connected device (Easiest)**
 ```bash
-# 1. Extract modules from boot image
-./extract_touch_modules.sh boot.img
-
-# 2. Add modules to device tree
-./add_modules_to_recovery.sh <device_codename> extracted_modules
-
-# 3. Verify setup
-./verify_setup.sh <device_codename>
-
-# 4. Rebuild recovery
+# Connect device via ADB and run:
+./extract_from_device.sh <device_codename>
+./add_modules_to_recovery.sh <device_codename> prebuilts/<device_codename>/modules
 ```
 
-Or use the all-in-one script:
+**Option 2: Extract from boot image**
 ```bash
-./setup_touchscreen.sh boot.img <device_codename>
+./extract_touch_modules.sh boot.img
+./add_modules_to_recovery.sh <device_codename> extracted_modules
+```
+
+**Option 3: Extract from stock ROM**
+See [EXTRACTING_FROM_STOCK.md](EXTRACTING_FROM_STOCK.md) for modern boot image formats (v4)
+
+Then verify and rebuild:
+```bash
+./verify_setup.sh <device_codename>
+# Rebuild recovery
 ```

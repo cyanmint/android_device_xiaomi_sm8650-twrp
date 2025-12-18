@@ -1,6 +1,16 @@
 # Quick Reference: Touchscreen Driver Integration
 
-## One-Command Solution
+## Easiest: Extract from Connected Device
+
+```bash
+# Connect device via ADB and run:
+./extract_from_device.sh <device_codename>
+
+# Then add to device tree:
+./add_modules_to_recovery.sh <device_codename> prebuilts/<device_codename>/modules
+```
+
+## One-Command Solution (from boot image)
 
 ```bash
 # Extract and add in one go (for aurora device example)
@@ -10,6 +20,13 @@
 ## Individual Steps
 
 ### 1. Extract Modules
+
+**From Device (Recommended):**
+```bash
+./extract_from_device.sh <device_codename>
+```
+
+**From Boot Image:**
 ```bash
 ./extract_touch_modules.sh <boot_image> [output_dir]
 
@@ -19,6 +36,9 @@
 ./extract_touch_modules.sh init_boot.img               # For Android 13+
 ```
 
+**From Stock ROM:**
+See [EXTRACTING_FROM_STOCK.md](EXTRACTING_FROM_STOCK.md) for modern boot images (v4)
+
 ### 2. Add to Device Tree
 ```bash
 ./add_modules_to_recovery.sh <device_codename> <modules_dir>
@@ -26,7 +46,7 @@
 # Examples:
 ./add_modules_to_recovery.sh aurora extracted_modules
 ./add_modules_to_recovery.sh peridot modules
-./add_modules_to_recovery.sh ruyi /path/to/modules
+./add_modules_to_recovery.sh ruyi prebuilts/ruyi/modules
 ```
 
 ### 3. Verify Setup
