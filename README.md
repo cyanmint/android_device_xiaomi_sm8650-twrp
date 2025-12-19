@@ -56,3 +56,11 @@ Then verify and rebuild:
 ./verify_setup.sh <device_codename>
 # Rebuild recovery
 ```
+
+## Recovery Image Too Large?
+
+If your recovery image exceeds the partition size limit, use the minimal module set:
+
+📖 **See [IMAGE_SIZE_MANAGEMENT.md](IMAGE_SIZE_MANAGEMENT.md) for solutions**
+
+The ruyi device uses a minimal module set (8 modules, 7.5MB) instead of all 343 modules (62MB) to avoid partition size issues. See the guide for customizing which modules to include.

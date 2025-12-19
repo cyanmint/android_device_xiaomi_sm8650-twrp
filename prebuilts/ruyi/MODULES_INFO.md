@@ -11,10 +11,34 @@
 ## Extraction Summary
 
 - **Total Modules Extracted:** 343
-- **Total Size:** 64 MB
-- **Location:** `prebuilts/ruyi/modules/`
+- **Total Size (Full Set):** 62 MB
+- **Location (Full Set):** `prebuilts/ruyi/modules/`
+- **Minimal Set:** 8 modules, 7.5 MB
+- **Location (Minimal):** `prebuilts/ruyi/modules_minimal/`
 
-## Modules Included
+## Module Sets
+
+### Minimal Set (Default - Recommended)
+
+To prevent recovery image from exceeding partition size, a minimal set is used by default:
+
+**8 Essential Modules (7.5 MB):**
+- `goodix_cap.ko` (129KB) - Touchscreen driver
+- `binder_gki.ko` (94KB) - Android IPC
+- `msm_drm.ko` (5.9MB) - Display/graphics
+- `qcom-spmi-pmic.ko` (29KB) - Power management
+- `pinctrl-spmi-gpio.ko` (56KB) - GPIO control
+- `i2c-msm-geni.ko` (128KB) - I2C bus
+- `spi-msm-geni.ko` (115KB) - SPI bus  
+- `ufs_qcom.ko` (1.1MB) - Storage
+
+### Full Set (Optional)
+
+All 343 modules available in `prebuilts/ruyi/modules/` if partition size allows.
+
+⚠️ **Warning:** Using the full set (62MB) may cause the recovery image to exceed partition size limits. See [IMAGE_SIZE_MANAGEMENT.md](../../IMAGE_SIZE_MANAGEMENT.md) for details.
+
+## Modules Included (Full Set)
 
 ### Touchscreen Related
 - `goodix_cap.ko` - Goodix capacitive touchscreen driver
@@ -34,13 +58,24 @@ All 343 kernel modules from the vendor_boot partition have been extracted and ve
 
 ## Integration
 
-The modules are integrated into the recovery image via `twrp_ruyi.mk`:
+By default, the minimal module set is used to keep recovery image size small:
 
 ```makefile
+# Use minimal set (7.5MB) instead of full set (62MB)
+PRODUCT_COPY_FILES += $(call find-copy-subdir-files,*,\
+    device/xiaomi/sm8650/prebuilts/ruyi/modules_minimal,\
+    recovery/root/vendor/lib/modules)
+```
+
+To use all modules (if partition size allows):
+```makefile
+# Change modules_minimal to modules
 PRODUCT_COPY_FILES += $(call find-copy-subdir-files,*,\
     device/xiaomi/sm8650/prebuilts/ruyi/modules,\
     recovery/root/vendor/lib/modules)
 ```
+
+See [IMAGE_SIZE_MANAGEMENT.md](../../IMAGE_SIZE_MANAGEMENT.md) for more options.
 
 ## Module Loading
 
