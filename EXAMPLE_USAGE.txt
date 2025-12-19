@@ -1,0 +1,118 @@
+# Example Usage Scenarios
+
+## Scenario 1: First-time setup for aurora device
+
+$ ./extract_touch_modules.sh boot.img
+[INFO] Starting touchscreen module extraction from boot.img
+[INFO] Using magiskboot for extraction
+[INFO] Found: ./vendor/lib/modules/focaltech_touch.ko
+[INFO] Found: ./vendor/lib/modules/goodix_core.ko
+[INFO] Found: ./vendor/lib/modules/xiaomi_touch.ko
+[INFO] Extraction complete!
+[INFO] Found 12 module(s)
+
+$ ./add_modules_to_recovery.sh aurora extracted_modules
+[INFO] Found 12 kernel module(s)
+[INFO] Creating modules directory: prebuilts/aurora/modules
+[INFO] Copying modules to device tree...
+[INFO] Detected DEVICE_PATH: device/xiaomi/sm8650
+[INFO] Adding module copy directive to twrp_aurora.mk
+[INFO] Success! Modules have been added to the device tree.
+
+$ git status
+ M twrp_aurora.mk
+?? prebuilts/aurora/modules/
+
+$ git add .
+$ git commit -m "Add touchscreen modules for aurora"
+$ git push
+
+## Scenario 2: Using all-in-one script
+
+$ ./setup_touchscreen.sh vendor_boot.img peridot
+================================
+Touchscreen Module Setup
+================================
+[INFO] Boot image: vendor_boot.img
+[INFO] Device: peridot
+
+================================
+Step 1: Extracting Modules
+================================
+[INFO] Starting touchscreen module extraction...
+[INFO] Found 10 module(s)
+
+================================
+Step 2: Adding to Device Tree
+================================
+[INFO] Modules copied to prebuilts/peridot/modules/
+[INFO] Makefile updated: twrp_peridot.mk
+
+================================
+Setup Complete!
+================================
+
+Next steps:
+  1. Review changes with: git diff
+  2. Commit changes
+  3. Rebuild recovery image
+
+## Scenario 3: Troubleshooting - No modules found in boot.img
+
+$ ./extract_touch_modules.sh boot.img
+[WARN] No modules were extracted. This could mean:
+  1. The modules are in the kernel image (built-in)
+  2. The modules are in vendor_boot.img instead of boot.img
+  3. The boot image format is not supported
+
+Try extracting from vendor_boot.img if available
+
+$ ./extract_touch_modules.sh vendor_boot.img
+[INFO] Found: ./vendor/lib/modules/synaptics_tcm2.ko
+[INFO] Extraction complete!
+[INFO] Found 8 module(s)
+
+## Scenario 4: Updating modules for existing setup
+
+$ ./extract_touch_modules.sh new_boot.img updated_modules
+[INFO] Found 15 module(s)
+
+$ ./add_modules_to_recovery.sh ruyi updated_modules
+[WARN] Module copy directive already exists in twrp_ruyi.mk
+[INFO] Modules have been updated in prebuilts/ruyi/modules
+[INFO] Success! Modules have been updated.
+
+## Scenario 5: Checking results after flashing recovery
+
+$ adb reboot recovery
+# After boot
+
+$ adb shell
+ruyi:/ # ls /vendor/lib/modules/
+focaltech_touch.ko
+goodix_core.ko
+xiaomi_touch.ko
+...
+
+ruyi:/ # dmesg | grep -i touch
+[    2.123456] focaltech_touch: module loaded successfully
+[    2.234567] goodix_core: Goodix TouchScreen driver loaded
+[    2.345678] xiaomi_touch: module initialized
+
+# Touchscreen now works in recovery!
+
+## Scenario 6: Multiple devices in same tree
+
+$ ./extract_touch_modules.sh boot_aurora.img modules_aurora
+$ ./add_modules_to_recovery.sh aurora modules_aurora
+
+$ ./extract_touch_modules.sh boot_peridot.img modules_peridot
+$ ./add_modules_to_recovery.sh peridot modules_peridot
+
+$ git status
+ M twrp_aurora.mk
+ M twrp_peridot.mk
+?? prebuilts/aurora/modules/
+?? prebuilts/peridot/modules/
+
+$ git add . && git commit -m "Add touchscreen modules for aurora and peridot"
