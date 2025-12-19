@@ -24,8 +24,15 @@ PRODUCT_COPY_FILES += $(call find-copy-subdir-files,*,device/xiaomi/sm8650/prebu
 
 # Kernel modules for touchscreen and hardware support
 # Use minimal set to keep recovery image size small (7.5MB vs 62MB)
-# To use all modules, change 'modules_minimal' to 'modules'
-PRODUCT_COPY_FILES += $(call find-copy-subdir-files,*,device/xiaomi/sm8650/prebuilts/ruyi/modules_minimal,recovery/root/vendor/lib/modules)
+PRODUCT_PACKAGES += \
+    qcom-spmi-pmic \
+    ufs_qcom \
+    msm_drm \
+    pinctrl-spmi-gpio \
+    i2c-msm-geni \
+    binder_gki \
+    spi-msm-geni \
+    goodix_cap
 
 # Release name
 PRODUCT_RELEASE_NAME := ruyi

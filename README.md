@@ -64,3 +64,15 @@ If your recovery image exceeds the partition size limit, use the minimal module 
 📖 **See [IMAGE_SIZE_MANAGEMENT.md](IMAGE_SIZE_MANAGEMENT.md) for solutions**
 
 The ruyi device uses a minimal module set (8 modules, 7.5MB) instead of all 343 modules (62MB) to avoid partition size issues. See the guide for customizing which modules to include.
+
+## FBE Decryption (File-Based Encryption)
+
+This device tree includes support for decrypting `/data` partition with File-Based Encryption (FBE).
+
+**Features:**
+* Full FBE decryption support for Android 14+
+* Qualcomm hardware-backed encryption (ICE - Inline Crypto Engine)
+* Metadata partition decryption
+* Wrapped key support
+
+The recovery will automatically prompt for your PIN/Password/Pattern to decrypt the data partition when booting into recovery mode.
