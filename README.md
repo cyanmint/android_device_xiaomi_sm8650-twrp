@@ -31,13 +31,18 @@ Quick start:
 ./add_modules_to_recovery.sh <device_codename> prebuilts/<device_codename>/modules
 ```
 
-**Option 2: Extract from boot image**
+**Option 2: Extract from vendor_boot image (Modern devices)**
+```bash
+./extract_from_vendor_boot.sh vendor_boot.img extracted_modules <device_codename>
+```
+
+**Option 3: Extract from boot image (Older format)**
 ```bash
 ./extract_touch_modules.sh boot.img
 ./add_modules_to_recovery.sh <device_codename> extracted_modules
 ```
 
-**Option 3: Extract from stock ROM**
+**Option 4: Extract from stock ROM**
 See [EXTRACTING_FROM_STOCK.md](EXTRACTING_FROM_STOCK.md) for modern boot image formats (v4)
 
 Then verify and rebuild:

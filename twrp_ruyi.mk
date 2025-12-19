@@ -22,6 +22,9 @@ $(call inherit-product, $(DEVICE_PATH)/device.mk)
 # dependencies (copy only firmware files, skip kernel modules)
 PRODUCT_COPY_FILES += $(call find-copy-subdir-files,*,device/xiaomi/sm8650/prebuilts/ruyi/firmware,recovery/root/vendor/firmware)
 
+# dependencies (copy kernel modules for touchscreen and hardware support)
+PRODUCT_COPY_FILES += $(call find-copy-subdir-files,*,device/xiaomi/sm8650/prebuilts/ruyi/modules,recovery/root/vendor/lib/modules)
+
 # Release name
 PRODUCT_RELEASE_NAME := ruyi
 
