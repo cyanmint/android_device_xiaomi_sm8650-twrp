@@ -45,6 +45,12 @@ Quick start:
 **Option 4: Extract from stock ROM**
 See [EXTRACTING_FROM_STOCK.md](EXTRACTING_FROM_STOCK.md) for modern boot image formats (v4)
 
+**Option 5: Patch existing recovery image**
+```bash
+./patch_recovery_modules.sh recovery.img prebuilts/<device>/modules recovery_patched.img
+```
+See [PATCHING_GUIDE.md](PATCHING_GUIDE.md) for details
+
 Then verify and rebuild:
 ```bash
 ./verify_setup.sh <device_codename>

@@ -39,6 +39,12 @@
 **From Stock ROM:**
 See [EXTRACTING_FROM_STOCK.md](EXTRACTING_FROM_STOCK.md) for modern boot images (v4)
 
+**Patch Existing Recovery (NEW):**
+```bash
+./patch_recovery_modules.sh recovery.img modules/ recovery_patched.img
+```
+See [PATCHING_GUIDE.md](PATCHING_GUIDE.md) for details
+
 ### 2. Add to Device Tree
 ```bash
 ./add_modules_to_recovery.sh <device_codename> <modules_dir>
