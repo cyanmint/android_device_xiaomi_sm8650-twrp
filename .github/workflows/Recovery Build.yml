@@ -106,6 +106,7 @@ jobs:
 
     - name: Initialize repo
       run: |
+        rm -rf workspace
         mkdir workspace
         cd workspace
         echo "workspace-folder=$(pwd)" >> $GITHUB_OUTPUT
