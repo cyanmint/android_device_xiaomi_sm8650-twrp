@@ -43,6 +43,11 @@ on:
         - boot
         - recovery
         - vendorboot
+      DRY_RUN:
+        description: 'Dry run mode (test all steps without building)'
+        required: true
+        default: false
+        type: boolean
 
 jobs:
   build:
@@ -149,10 +154,28 @@ jobs:
         export CCACHE_DIR=~/.ccache
         export CCACHE_EXEC=/usr/bin/ccache
         set -e
-        # Note: 'make clean' intentionally omitted to leverage ccache and enable incremental builds
-        lunch twrp_${{ inputs.DEVICE_NAME }}-eng && mka adbd ${{ inputs.BUILD_TARGET }}image
+        
+        # Execute lunch command
+        lunch twrp_${{ inputs.DEVICE_NAME }}-eng
+        
+        # Only run make command if not in dry-run mode
+        if [ "${{ inputs.DRY_RUN }}" = "false" ]; then
+          echo "=== Building OrangeFox ==="
+          # Note: 'make clean' intentionally omitted to leverage ccache and enable incremental builds
+          mka adbd ${{ inputs.BUILD_TARGET }}image
+        else
+          echo "=== DRY RUN MODE - Skipping build ==="
+          echo "All setup completed successfully. Build command would be:"
+          echo "mka adbd ${{ inputs.BUILD_TARGET }}image"
+          echo ""
+          echo "✓ Build environment configured"
+          echo "✓ Device tree verified at ${{ inputs.DEVICE_PATH }}"
+          echo "✓ Lunch command executed for twrp_${{ inputs.DEVICE_NAME }}-eng"
+          echo "✓ Ready to build fox_${{ inputs.MANIFEST_BRANCH }}"
+        fi
 
     - name: Upload Artifacts
+      if: inputs.DRY_RUN == false
       uses: actions/upload-artifact@v4
       with:
         name: OrangeFox-${{ inputs.DEVICE_NAME }}-${{ github.run_id }}
@@ -163,6 +186,7 @@ jobs:
         if-no-files-found: warn
 
     - name: Set Release Properties
+      if: inputs.DRY_RUN == false
       run: |
         echo "BUILD_DATE=$(TZ=Asia/Manila date +%Y%m%d)" >> $GITHUB_ENV
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
@@ -174,6 +198,7 @@ jobs:
         echo "DEVICE_TREE_URL=${DEVICE_TREE_URL}" >> $GITHUB_ENV
 
     - name: Upload to Release
+      if: inputs.DRY_RUN == false
       uses: softprops/action-gh-release@v2
       with:
         files: |
@@ -187,4 +212,26 @@ jobs:
           Device: [Device Tree/Branch](${{ env.DEVICE_TREE_URL }}/tree/${{ inputs.DEVICE_TREE_BRANCH }})
           Commit: Most recent [commit](${{ env.DEVICE_TREE_URL }}/commit/${{ env.COMMIT_ID }}) during building.
           
+    - name: Dry Run Summary
+      if: inputs.DRY_RUN == true
+      run: |
+        echo "# Dry Run Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## ✅ All steps verified successfully!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Configuration:" >> $GITHUB_STEP_SUMMARY
+        echo "- **Manifest Branch**: fox_${{ inputs.MANIFEST_BRANCH }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Device Name**: ${{ inputs.DEVICE_NAME }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Device Path**: ${{ inputs.DEVICE_PATH }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Build Target**: ${{ inputs.BUILD_TARGET }}image" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Verified Steps:" >> $GITHUB_STEP_SUMMARY
+        echo "1. ✓ Build environment setup" >> $GITHUB_STEP_SUMMARY
+        echo "2. ✓ OrangeFox manifest sync (fox_${{ inputs.MANIFEST_BRANCH }})" >> $GITHUB_STEP_SUMMARY
+        echo "3. ✓ Device tree clone" >> $GITHUB_STEP_SUMMARY
+        echo "4. ✓ Device makefile validation" >> $GITHUB_STEP_SUMMARY
+        echo "5. ✓ Lunch command execution" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**The workflow is ready to build. Set DRY_RUN to false to perform actual build.**" >> $GITHUB_STEP_SUMMARY
+
 
