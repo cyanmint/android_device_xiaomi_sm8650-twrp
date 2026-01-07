@@ -72,6 +72,7 @@ jobs:
     - name: Build Environment
       run: |
         sudo apt install aria2 -y
+        rm -rf scripts
         git clone https://gitlab.com/OrangeFox/misc/scripts.git -b master
         cd scripts
         sudo bash setup/android_build_env.sh
@@ -110,6 +111,7 @@ jobs:
             rm -rf fox_${{ inputs.MANIFEST_BRANCH }}
             git config --global user.name "${{ github.actor }}"
             git config --global user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+            rm -rf sync
             git clone https://gitlab.com/OrangeFox/sync.git -b master
             cd sync
             ./orangefox_sync.sh --branch ${{ inputs.MANIFEST_BRANCH }} --path ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
@@ -118,6 +120,7 @@ jobs:
           echo "No valid cache found, performing full sync..."
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          rm -rf sync
           git clone https://gitlab.com/OrangeFox/sync.git -b master
           cd sync
           ./orangefox_sync.sh --branch ${{ inputs.MANIFEST_BRANCH }} --path ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
